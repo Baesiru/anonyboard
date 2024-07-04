@@ -22,7 +22,7 @@ public class UserDto {
     private String username;
     @NotBlank(message="비밀번호를 입력해야 합니다.")
     @Size(min=8, max=20, message="비밀번호는 8글자 이상, 20글자 이하여야 합니다.")
-    @Pattern(regexp="^(?=.*[a-zA-Z])(?=.*\\\\d)(?=.*[\\\\W_]).+$",
+    @Pattern(regexp="^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[\\W_]).+$",
     message="비밀번호는 영어, 숫자, 특수문자를 모두 입력해야 합니다.")
     private String password;
     @NotBlank(message="이름을 입력해야 합니다.")

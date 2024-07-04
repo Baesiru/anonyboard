@@ -1,7 +1,7 @@
-package com.example.anonyboard.filter;
+package com.example.anonyboard.config.security.filter;
 
-import com.example.anonyboard.config.CustomUserDetails;
-import com.example.anonyboard.config.TokenProvider;
+import com.example.anonyboard.config.security.CustomUserDetails;
+import com.example.anonyboard.config.security.TokenProvider;
 import com.example.anonyboard.entity.User;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

@@ -1,4 +1,4 @@
-package com.example.anonyboard.config;
+package com.example.anonyboard.config.security;
 
 import com.example.anonyboard.entity.User;
 import org.springframework.security.core.GrantedAuthority;

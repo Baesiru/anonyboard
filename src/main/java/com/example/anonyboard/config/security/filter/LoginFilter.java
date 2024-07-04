@@ -1,21 +1,28 @@
-package com.example.anonyboard.filter;
+package com.example.anonyboard.config.security.filter;
 
-import com.example.anonyboard.config.CustomUserDetails;
-import com.example.anonyboard.config.TokenProvider;
+import com.example.anonyboard.config.security.CustomUserDetails;
+import com.example.anonyboard.config.security.TokenProvider;
+import com.example.anonyboard.config.security.exception.CustomAuthenticationFailureHandler;
+import com.example.anonyboard.config.security.exception.IllegalPasswordException;
+import com.example.anonyboard.config.security.exception.IllegalUsernameException;
 import com.example.anonyboard.dto.LoginDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -24,26 +31,36 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final TokenProvider tokenProvider;
     private final AuthenticationManager authenticationManager;
     private final ObjectMapper objectMapper;
-    public LoginFilter(AuthenticationManager authenticationManager, TokenProvider tokenProvider, ObjectMapper objectMapper){
+    public LoginFilter(AuthenticationManager authenticationManager, TokenProvider tokenProvider, ObjectMapper objectMapper, CustomAuthenticationFailureHandler failureHandler){
         this.authenticationManager = authenticationManager;
         this.tokenProvider = tokenProvider;
         this.objectMapper = objectMapper;
+        this.setAuthenticationFailureHandler(failureHandler);
+        setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/api/login"));
     }
-
-    
 
     @Override
     @SneakyThrows
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         LoginDto loginDto = objectMapper.readValue(request.getInputStream(), LoginDto.class);
+
         String username = loginDto.getUsername();
         String password = loginDto.getPassword();
+
+        if (username == null){
+            throw new IllegalUsernameException("아이디를 입력해주세요");
+        }
+        else if (password == null) {
+            throw new IllegalPasswordException("비밀번호를 입력해주세요");
+        }
+
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
         return authenticationManager.authenticate(authToken);
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication)
+            throws IOException, ServletException{
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
         String username = customUserDetails.getUsername();
         String email = customUserDetails.getEmail();
@@ -63,10 +80,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                 .httpOnly(true)
                 .build();
         response.setHeader("Set-Cookie", cookie.toString());
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType("application/json");
+        response.getWriter().write(username+"님 환영합니다.");
     }
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
-        response.setStatus(401);
+        throw new BadCredentialsException("아이디 또는 비밀번호를 확인해주세요.");
     }
 
 

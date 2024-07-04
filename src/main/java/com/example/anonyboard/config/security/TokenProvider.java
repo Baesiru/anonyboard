@@ -1,4 +1,4 @@
-package com.example.anonyboard.config;
+package com.example.anonyboard.config.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

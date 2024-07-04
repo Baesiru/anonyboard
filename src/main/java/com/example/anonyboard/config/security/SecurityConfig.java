@@ -1,7 +1,8 @@
-package com.example.anonyboard.config;
+package com.example.anonyboard.config.security;
 
-import com.example.anonyboard.filter.JWTFilter;
-import com.example.anonyboard.filter.LoginFilter;
+import com.example.anonyboard.config.security.exception.CustomAuthenticationFailureHandler;
+import com.example.anonyboard.config.security.filter.JWTFilter;
+import com.example.anonyboard.config.security.filter.LoginFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,13 +20,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
     private final AuthenticationConfiguration authenticationConfiguration;
     private final TokenProvider tokenProvider;
     private final ObjectMapper objectMapper;
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, TokenProvider tokenProvider, ObjectMapper objectMapper) {
+    private final CustomAuthenticationFailureHandler failureHandler;
+
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, TokenProvider tokenProvider, ObjectMapper objectMapper, CustomAuthenticationFailureHandler failureHandler) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.tokenProvider = tokenProvider;
         this.objectMapper = objectMapper;
+        this.failureHandler = failureHandler;
     }
 
     @Bean
@@ -43,11 +48,12 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/login").permitAll()
+                        .requestMatchers("/api/login").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().permitAll());
+
         http.
-                addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), tokenProvider, objectMapper), UsernamePasswordAuthenticationFilter.class);
+                addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), tokenProvider, objectMapper, failureHandler), UsernamePasswordAuthenticationFilter.class);
         http.
                 addFilterBefore(new JWTFilter(tokenProvider),LoginFilter.class);
 
@@ -57,5 +63,10 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public CustomAuthenticationFailureHandler failureHandler(){
+        return new CustomAuthenticationFailureHandler();
     }
 }
