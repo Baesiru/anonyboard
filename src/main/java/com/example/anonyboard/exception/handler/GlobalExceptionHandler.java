@@ -1,7 +1,5 @@
 package com.example.anonyboard.exception.handler;
 
-import com.example.anonyboard.config.security.exception.IllegalPasswordException;
-import com.example.anonyboard.config.security.exception.IllegalUsernameException;
 import com.example.anonyboard.exception.errorCode.CommonErrorCode;
 import com.example.anonyboard.exception.errorCode.ErrorCode;
 import com.example.anonyboard.exception.exception.RestApiException;
@@ -44,17 +42,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(CommonErrorCode.INVALID_PARAMETER, e.getMessage());
     }
 
-    // IllegalUsernameException 에러 처리
-    @ExceptionHandler(IllegalUsernameException.class)
-    public ResponseEntity<Object> handleIllegalUsername(IllegalUsernameException e) {
-        return handleExceptionInternal(CommonErrorCode.INVALID_PARAMETER, e.getMessage());
-    }
-
-    // IllegalPasswordException 에러 처리
-    @ExceptionHandler(IllegalPasswordException.class)
-    public ResponseEntity<Object> handleIllegalPassword(IllegalPasswordException e) {
-        return handleExceptionInternal(CommonErrorCode.INVALID_PARAMETER, e.getMessage());
-    }
 
     // Get 요청의 파라미터 검증 애네터이션들에서 넘어오는 에러 처리
     @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)

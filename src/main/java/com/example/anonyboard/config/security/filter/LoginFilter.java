@@ -2,7 +2,6 @@ package com.example.anonyboard.config.security.filter;
 
 import com.example.anonyboard.config.security.CustomUserDetails;
 import com.example.anonyboard.config.security.TokenProvider;
-import com.example.anonyboard.config.security.exception.CustomAuthenticationFailureHandler;
 import com.example.anonyboard.config.security.exception.IllegalPasswordException;
 import com.example.anonyboard.config.security.exception.IllegalUsernameException;
 import com.example.anonyboard.dto.LoginDto;
@@ -12,7 +11,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,16 +24,14 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
-
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final TokenProvider tokenProvider;
     private final AuthenticationManager authenticationManager;
     private final ObjectMapper objectMapper;
-    public LoginFilter(AuthenticationManager authenticationManager, TokenProvider tokenProvider, ObjectMapper objectMapper, CustomAuthenticationFailureHandler failureHandler){
+    public LoginFilter(AuthenticationManager authenticationManager, TokenProvider tokenProvider, ObjectMapper objectMapper){
         this.authenticationManager = authenticationManager;
         this.tokenProvider = tokenProvider;
         this.objectMapper = objectMapper;
-        this.setAuthenticationFailureHandler(failureHandler);
         setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher("/api/login"));
     }
 
@@ -43,17 +39,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @SneakyThrows
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         LoginDto loginDto = objectMapper.readValue(request.getInputStream(), LoginDto.class);
-
         String username = loginDto.getUsername();
         String password = loginDto.getPassword();
 
-        if (username == null){
+        if (username == null)
             throw new IllegalUsernameException("아이디를 입력해주세요");
-        }
-        else if (password == null) {
+        if (password == null)
             throw new IllegalPasswordException("비밀번호를 입력해주세요");
-        }
-
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
         return authenticationManager.authenticate(authToken);
     }
@@ -70,24 +62,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
         String access_token = tokenProvider.generateAccessToken(username, email, nickname, role);
-        String refresh_token = tokenProvider.generateRefreshToken(username, email, nickname, role);
         response.addHeader("Authorization", "Bearer " + access_token);
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", refresh_token)
-                .maxAge(7 * 24 * 60 * 60)
-                .path("/")
-                .secure(true)
-                .sameSite("None")
-                .httpOnly(true)
-                .build();
-        response.setHeader("Set-Cookie", cookie.toString());
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json");
         response.getWriter().write(username+"님 환영합니다.");
     }
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
-        throw new BadCredentialsException("아이디 또는 비밀번호를 확인해주세요.");
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+        throw new BadCredentialsException("아이디 또는 비밀번호를 확인해주세요");
     }
-
 
 }
