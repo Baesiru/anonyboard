@@ -9,7 +9,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -88,16 +87,7 @@ public class JWTFilter extends OncePerRequestFilter {
             String nickname2 = tokenProvider.getNickname(refresh);
             String role2 = tokenProvider.getRole(refresh);
             token = tokenProvider.generateAccessToken(username2, email2, nickname2, role2);
-            String newRefreshToken = tokenProvider.generateRefreshToken(username2, email2, nickname2, role2);
             response.addHeader("Authorization", "Bearer " + token);
-            ResponseCookie cookie = ResponseCookie.from("refreshToken", newRefreshToken)
-                    .maxAge(7 * 24 * 60 * 60)
-                    .path("/")
-                    .secure(true)
-                    .sameSite("None")
-                    .httpOnly(true)
-                    .build();
-            response.setHeader("Set-Cookie", cookie.toString());
             return token;
         } else {
             return null;

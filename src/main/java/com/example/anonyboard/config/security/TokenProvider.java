@@ -16,7 +16,7 @@ public class TokenProvider {
     @Value("${jwt.secret}")
     private String key;
     private SecretKey secretKey;
-    private static final Long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 30L;
+    private static final Long ACCESS_TOKEN_EXPIRE_TIME = 1000 *  30L;
     private static final Long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60L * 24 * 7;
 
     @PostConstruct

@@ -11,6 +11,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -62,9 +63,18 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
         String access_token = tokenProvider.generateAccessToken(username, email, nickname, role);
+        String refresh_token = tokenProvider.generateRefreshToken(username, email, nickname, role);
         response.addHeader("Authorization", "Bearer " + access_token);
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("application/json");
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", refresh_token)
+                .maxAge(7 * 24 * 60 * 60)
+                .path("/")
+                .secure(true)
+                .sameSite("None")
+                .httpOnly(true)
+                .build();
+        response.setHeader("Set-Cookie", cookie.toString());
         response.getWriter().write(username+"님 환영합니다.");
     }
     @Override
