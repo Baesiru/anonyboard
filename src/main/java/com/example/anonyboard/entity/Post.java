@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,7 +24,13 @@ public class Post {
     @Column
     private String nickname;
     @Column
+    private String username;
+    @Column
     private String password;
     @Column
+    private LocalDateTime currentDateTime;
+    @Column
     private boolean isUser;
+    @Column
+    private int views;
 }

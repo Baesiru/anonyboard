@@ -48,4 +48,5 @@ public class UserController {
         }
         return ResponseEntity.ok().body("사용 가능한 아이디입니다.");
     }
+
 }

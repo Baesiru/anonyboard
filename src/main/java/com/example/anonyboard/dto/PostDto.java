@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @AllArgsConstructor
 @Getter
 @Setter
@@ -13,8 +15,11 @@ public class PostDto {
     private String title;
     private String content;
     private String nickname;
+    private String username;
     private String password;
+    private LocalDateTime localDateTime;
     public Post toEntity(boolean isUser){
-        return new Post(id, title, content, nickname, password, isUser);
+        localDateTime = LocalDateTime.now();
+        return new Post(id, title, content, nickname,username, password, localDateTime, isUser, 0);
     }
 }

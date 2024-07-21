@@ -18,6 +18,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -32,7 +33,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     // IllegalArgumentException 에러 처리
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Object> handleIllegalArgument(IllegalArgumentException e) {
-        //log.warn("handleIllegalArgument", e);
         return handleExceptionInternal(CommonErrorCode.INVALID_PARAMETER, e.getMessage());
     }
 
@@ -46,7 +46,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     // Get 요청의 파라미터 검증 애네터이션들에서 넘어오는 에러 처리
     @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
     public ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException e) {
-        //log.warn("handleConstraintViolation", e);
         return handleExceptionInternal(e, CommonErrorCode.INVALID_PARAMETER);
     }
 
@@ -70,6 +69,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             WebRequest request) {
         //log.warn("handleIllegalArgument", ex);
         return handleExceptionInternal(ex, CommonErrorCode.INVALID_PARAMETER);
+    }
+
+    //NoSuchElementException 예외 처리
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseEntity<Object> handleNoSuchException(NoSuchElementException e) {
+        return handleExceptionInternal(CommonErrorCode.RESOURCE_NOT_FOUND);
     }
 
     // 대부분의 에러 처리
