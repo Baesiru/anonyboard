@@ -1,6 +1,7 @@
 package com.example.anonyboard.dto;
 
 import com.example.anonyboard.entity.Post;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,7 +13,9 @@ import java.time.LocalDateTime;
 @Setter
 public class PostDto {
     private Long id;
+    @NotBlank(message="제목을 입력해야 합니다.")
     private String title;
+    @NotBlank(message="내용을 입력해야 합니다.")
     private String content;
     private String nickname;
     private String username;

@@ -27,8 +27,15 @@ public class PostService {
 
     @Transactional
     public Post createPost(PostDto postDto, boolean isUser) {
-        if (isUser == false)
+        if (isUser == false){
+            if (postDto.getNickname() == null){
+                throw new IllegalArgumentException("닉네임을 입력해야 합니다.");
+            }
+            if (postDto.getPassword() == null){
+                throw new IllegalArgumentException("비밀번호를 입력해야 합니다.");
+            }
             postDto.setPassword(passwordEncoder.encode(postDto.getPassword()));
+        }
         Post post = postDto.toEntity(isUser);
         postRepository.save(post);
         return post;
@@ -83,7 +90,5 @@ public class PostService {
                 throw new IllegalArgumentException("비밀번호가 틀립니다");
             }
         }
-
-
     }
 }
